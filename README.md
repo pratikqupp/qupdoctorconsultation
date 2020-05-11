@@ -433,6 +433,7 @@ Variable | Description | Default value
 `JVB_TCP_MAPPED_PORT` | TCP port advertised by Jitsi Videobridge | 4443
 `JVB_BREWERY_MUC` | MUC name for the JVB pool | jvbbrewery
 `JVB_ENABLE_APIS` | Comma separated list of JVB APIs to enable | none
+`JIGASI_DEFAULT_ROOM_NAME` | Default room name to connect incoming calls to if no room header specified | siptest
 `JIGASI_XMPP_USER` | XMPP user for Jigasi MUC client connections | jigasi
 `JIGASI_XMPP_PASSWORD` | XMPP password for Jigasi MUC client connections | passw0rd
 `JIGASI_BREWERY_MUC` | MUC name for the Jigasi pool | jigasibrewery
