@@ -244,6 +244,7 @@ services:
             - JVB_WS_DOMAIN
             - JVB_WS_SERVER_ID
             - PUBLIC_URL
+            - JVB_JVM_MAX_MEM
             - TZ
         depends_on:
             - prosody
