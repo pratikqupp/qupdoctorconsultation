@@ -180,6 +180,11 @@ services:
             - TURN_PORT
             - TURNS_PORT
             - TZ
+            - ENABLE_TURN
+            - TURN_SECRET
+            - TURN_HOST
+            - TURN_PORT
+            - TURN_TRANSPORT
         networks:
             meet.jitsi:
                 aliases:
