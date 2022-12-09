@@ -1,0 +1,62 @@
+#!/command/with-contenv /bin/sh
+# eturnal config
+#DOCKER_INTERNAL_IP=$(cat /etc/hosts | grep $(hostname) |  awk '{ print $1 }')
+cat > /opt/eturnal/etc/eturnal.yml <<EOF
+eturnal:
+  listen:
+    -
+      ip: "::"
+      port: 443
+      transport: udp
+    -
+      ip: "::"
+      port: 3478
+      transport: auto
+      proxy_protocol: true
+
+  ## TLS certificate/key files (must be readable by 'eturnal' user!):
+  #tls_crt_file: /opt/eturnal/tls/fullchain.pem
+  #tls_key_file: /opt/eturnal/tls/key.pem
+
+  ## Reject TURN relaying from/to the following addresses/networks:
+  blacklist:                # This is the default blacklist.
+    - "127.0.0.0/8"         # IPv4 loopback.
+    - "::1"                 # IPv6 loopback.
+    - recommended           # Expands to a number of networks recommended to be
+                            # blocked, but includes private networks. Those
+                            # would have to be 'whitelist'ed if eturnal serves
+                            # local clients/peers within such networks.
+
+  ## Logging configuration:
+  log_level: info           # critical | error | warning | notice | info | debug
+  log_dir: stdout          # Enable for logging to the terminal/journal.
+
+  ## See: https://eturnal.net/documentation/#Module_Configuration
+  modules:
+    mod_log_stun: {}        # Log STUN queries (in addition to TURN sessions).
+    #mod_stats_influx: {}   # Log STUN/TURN events into InfluxDB.
+    #mod_stats_prometheus:  # Expose STUN/TURN and VM metrics to Prometheus.
+    #  ip: any              # This is the default: Listen on all interfaces.
+    #  port: 8081           # This is the default.
+    #  tls: false           # This is the default.
+    #  vm_metrics: true     # This is the default.
+EOF
+
+# tls certificates
+TLS_CERT_FILE=$(find /etc/ -name fullchain.pem)
+TLS_KEY_FILE=$(find /etc/ -name key.pem)
+if [ ! -z $TLS_CERT_FILE ] || [ ! -z $TLS_KEY_FILE ]; then
+  if [ ! -z $TLS_CERT_FILE ]; then
+    cp -p $TLS_CERT_FILE /opt/eturnal/tls
+    sed -i -e "s|#tls_crt_file:|tls_crt_file:|g" /opt/eturnal/etc/eturnal.yml
+  fi
+  if [ ! -z $TLS_KEY_FILE ]; then
+    cp -p $TLS_KEY_FILE /opt/eturnal/tls
+    sed -i -e "s|#tls_key_file:|tls_key_file:|g" /opt/eturnal/etc/eturnal.yml
+  fi
+  chown 9000:9000 /opt/eturnal/tls/*
+fi
+
+# change file permissions
+chown -R 9000:9000 /opt/eturnal/etc
+chmod 640 /opt/eturnal/etc/eturnal.yml

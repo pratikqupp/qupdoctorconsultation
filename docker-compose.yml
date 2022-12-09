@@ -8,6 +8,7 @@ services:
         ports:
             - '${HTTP_PORT}:80'
             - '${HTTPS_PORT}:443'
+            - '${TURN_PORT}:3478'
         volumes:
             - ${CONFIG}/web:/config:Z
             - ${CONFIG}/web/crontabs:/var/spool/cron/crontabs:Z
@@ -126,6 +127,8 @@ services:
             - TESTING_OCTO_PROBABILITY
             - TOKEN_AUTH_URL
             - TOOLBAR_BUTTONS
+            - TURN_HOST
+            - TURNS_HOST
             - TZ
             - VIDEOQUALITY_BITRATE_H264_LOW
             - VIDEOQUALITY_BITRATE_H264_STANDARD
@@ -335,6 +338,31 @@ services:
             - XMPP_PORT
         depends_on:
             - prosody
+        networks:
+            meet.jitsi:
+
+    # turn service
+    eturnal:
+        image: jitsi/eturnal:${JITSI_IMAGE_VERSION:-unstable}
+        restart: ${RESTART_POLICY:-unless-stopped}
+        ports:
+            - 443:443/udp
+            - '${TURN_RELAY_MIN_PORT:-50000}-${TURN_RELAY_MAX_PORT:-50500}:${TURN_RELAY_MIN_PORT:-50000}-${TURN_RELAY_MAX_PORT:-50500}/udp'
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - ${CONFIG}/eturnal:/opt/eturnal/etc:Z
+            - ${CONFIG}/web/acme-certs:/etc/eturnal/tls:Z
+        environment:
+            - TURN_CREDENTIALS
+            - TURN_RELAY_MIN_PORT
+            - TURN_RELAY_MAX_PORT
+            - TURNS_HOST
+            - DOCKER_HOST_ADDRESS
+            - JVB_DISABLE_STUN
+        depends_on:
+            - prosody
+            - web
         networks:
             meet.jitsi:
 
