@@ -14,6 +14,19 @@ RUN apt-dpkg-wrap apt-get update && \
     apt-dpkg-wrap apt-get install -y jigasi jq && \
     apt-cleanup
 
-COPY rootfs/ /
+COPY --chown=noroot:noroot rootfs/ /
 
-VOLUME ["/config", "/tmp/transcripts"]
+RUN chown -R noroot:noroot /etc/cont-init.d && \
+    chown -R noroot:noroot /etc/services.d && \
+    chown -R noroot:noroot /usr/share && \
+    chown -R noroot:noroot /defaults && \
+    mkdir -pm777 /config/transcripts && \
+    mkdir -p /config && chown -R noroot:noroot /config
+
+RUN chmod +x /etc/cont-init.d/* && \
+    chmod +x /etc/services.d/jigasi/* && \
+    chmod +x /usr/share/jigasi/jigasi.sh
+
+USER noroot
+
+VOLUME /config

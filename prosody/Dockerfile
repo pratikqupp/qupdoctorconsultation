@@ -67,11 +67,36 @@ RUN wget -qO /etc/apt/trusted.gpg.d/prosody.gpg https://prosody.im/files/prosody
     mv prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS/auth_hybrid_matrix_token/mod_matrix_affiliation.lua /prosody-plugins && \
     rm -rf prosody-plugins-$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS v$VERSION_JITSI_CONTRIB_PROSODY_PLUGINS.tar.gz
 
-COPY rootfs/ /
+COPY --chown=noroot:noroot rootfs/ /
 
-COPY --from=builder /usr/local/lib/lua/5.4 /usr/local/lib/lua/5.4
-COPY --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4
+COPY --chown=noroot:noroot --from=builder /usr/local/lib/lua/5.4 /usr/local/lib/lua/5.4
+COPY --chown=noroot:noroot --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4
+
+RUN mkdir -pm777 /var/run/saslauthd && \
+    mkdir -p /config/noroot_data && \
+    mkdir -p /config/certs && \
+    mkdir -p /config/conf.d && \
+    mkdir -p /prosody-plugins-custom
+
+RUN chown -R noroot:noroot /etc/cont-init.d && \
+    chown -R noroot:noroot /etc/services.d && \
+    chown -R noroot:noroot /etc/ldap && \
+    chown -R noroot:noroot /run && \
+    chown -R noroot:noroot /var && \
+    chown -R noroot:noroot /defaults && \
+    chown -R noroot:noroot /prosody-plugins && \
+    chown -R noroot:noroot /prosody-plugins-custom && \
+    mkdir -p /config/saslauthd
+
+RUN chmod +x /etc/cont-init.d/* && \
+    chmod +x /etc/services.d/10-saslauthd/* && \
+    chmod +x /etc/services.d/prosody/*
+
+RUN cp -r /defaults/* /config
+RUN chown -R noroot:noroot /config
 
 EXPOSE 5222 5280
+
+USER noroot
 
 VOLUME ["/config", "/prosody-plugins-custom"]

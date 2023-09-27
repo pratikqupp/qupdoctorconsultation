@@ -14,12 +14,38 @@ ARG USE_CHROMIUM=0
 # https://googlechromelabs.github.io/chrome-for-testing/
 ARG CHROME_RELEASE=116.0.5845.96
 
-COPY rootfs/ /
+COPY --chown=noroot:noroot rootfs/ /
 
 RUN apt-dpkg-wrap apt-get update && \
     apt-dpkg-wrap apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" jibri libgl1-mesa-dri procps jitsi-upload-integrations jitsi-autoscaler-sidecar jq pulseaudio dbus dbus-x11 rtkit unzip fonts-noto && \
     /usr/bin/install-chrome.sh && \
-    apt-cleanup && \
-    adduser jibri rtkit
+    apt-cleanup
+
+RUN mkdir -p /etc/jitsi/autoscaler-sidecar && \
+    mkdir -p /config/logs && \
+    mkdir -p /config/recordings && \
+    mkdir -p /home/jibri && chown -R noroot:noroot /home/jibri
+
+RUN chown -R noroot:noroot /etc/cont-init.d && \
+    chown -R noroot:noroot /etc/services.d && \
+    chown -R noroot:noroot /etc/jitsi && \
+    chown -R noroot:noroot /run && \
+    chown -R noroot:noroot /config && \
+    chown -R noroot:noroot /var && \
+    chown -R noroot:noroot /opt/jitsi && \
+    chown -R noroot:noroot /tmp && \
+    chown -R noroot:noroot /defaults && \
+    chown -R noroot:noroot /usr/bin
+
+RUN chmod +x /etc/cont-init.d/* && \
+    chmod +x /etc/services.d/10-xorg/* && \
+    chmod +x /etc/services.d/20-icewm/* && \
+    chmod +x /etc/services.d/30-pulse/* && \
+    chmod +x /etc/services.d/40-jibri/* && \
+    chmod +x /etc/services.d/50-autoscaler-sidecar/* && \
+    chmod +x /opt/jitsi/jibri/launch.sh
+
+
+USER noroot
 
 VOLUME /config
