@@ -39,6 +39,8 @@
 
 plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom", "/prosody-plugins-contrib" }
 
+admins = { "focus@$XMPP_AUTH_DOMAIN" }
+
 muc_mapper_domain_base = "v{{ $VISITOR_INDEX }}.{{ $VISITORS_XMPP_DOMAIN }}";
 muc_mapper_domain_prefix = "{{ $XMPP_MUC_DOMAIN_PREFIX }}";
 
